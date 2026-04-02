@@ -5,14 +5,14 @@
     "private": true,
     "type": "module",
     "scripts": {
-      "clean": "rm -rf node_modules __lwr_cache__ site",
-      "dev": "lwr dev",
-      "dev:compat": "lwr dev --mode compat",
-      "build": "lwr build --clean",
-      "build:prod-compat": "lwr build --clean --mode prod-compat",
-      "start": "lwr start",
-      "stage": "yarn build && yarn start",
-      "stage:prod-compat": "yarn build:prod-compat && yarn start"
+        "clean": "rm -rf node_modules __lwr_cache__ site",
+        "dev": "lwr dev",
+        "dev:compat": "lwr dev --mode compat",
+        "build": "lwr build --clean",
+        "build:prod-compat": "lwr build --clean --mode prod-compat",
+        "start": "lwr start",
+        "stage": "yarn build && yarn start",
+        "stage:prod-compat": "yarn build:prod-compat && yarn start"
     },
     "dependencies": {
         "lightning-base-components": "1.19.5-alpha",
@@ -24,5 +24,8 @@
     },
     "volta": {
         "node": "16.19.1"
+    },
+    "devDependencies": {
+        "json-server": "0.17.4"
     }
 }
