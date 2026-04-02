@@ -44,4 +44,15 @@
             </lightning-layout-item>
         </lightning-layout>
     </div>
+
+    <template lwc:if={showModal}>
+        <components-modal heading="Add Expenses">
+            <input type="text"/>
+            <div slot="footer">
+                <button class="slds-button slds-button_neutral" onclick={cancelHandler}>Cancel</button>
+                <button class="slds-button slds-button_brand" onclick={saveHandler}>Add Expense</button>
+            </div>
+       </components-modal>
+    </template>
+
 </template>
