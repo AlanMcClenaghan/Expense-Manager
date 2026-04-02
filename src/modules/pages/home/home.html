@@ -58,7 +58,7 @@
     </div>
 
     <template lwc:if={showModal}>
-        <components-modal heading="Add Expenses">
+        <components-modal heading={modalActionLabel}>
 
             <form>
                 <lightning-input type="text" label="Name" required name="Expense_Name__c" value={formData.Expense_Name__c} 
@@ -88,9 +88,9 @@
 
             <div slot="footer">
                 <button class="slds-button slds-button_neutral" onclick={cancelHandler}>Cancel</button>
-                <button class="slds-button slds-button_brand" onclick={saveHandler}>Add Expense</button>
+                <button class="slds-button slds-button_brand" onclick={saveHandler}>{modalActionLabel}</button>
             </div>
-            
+
        </components-modal>
     </template>
 
