@@ -4,6 +4,7 @@ const SERVER_URL = 'http://localhost:3004'
 export default class Home extends LightningElement {
 
      expenseRecords = []
+     categoryTableData=[]
      chartData
     
     async connectedCallback() {
@@ -62,13 +63,26 @@ export default class Home extends LightningElement {
                 categorySums[Category__c] = Amount__c
             }
         })
-
         console.log("categorySums", categorySums)
-        
+        this.categoryTableData = Object.keys(categorySums).map( (item,index) => {
+            return ({
+                "id": index +1,
+                "category": item,
+                "amount": this.formatCurrency(categorySums[item])
+            })
+        })
+        console.log(" this.categoryTableData ",  this.categoryTableData )
         this.chartData = {
             labels:Object.keys(categorySums),
             results:Object.values(categorySums)
         }
+    }
+
+    formatCurrency(number){
+        return number.toLocaleString('en-US', {
+            style:'currency',
+            currency:'USD'
+        })
     }
 
 }
