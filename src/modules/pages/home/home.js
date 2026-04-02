@@ -1,12 +1,22 @@
 import { LightningElement } from 'lwc';
+import {categoryList} from './categoryList'
+
 const SERVER_URL = 'http://localhost:3004'
+const ADD_ACTION = 'ADD'
 
 export default class Home extends LightningElement {
 
      expenseRecords = []
      categoryTableData=[]
      chartData
-     showModal = true
+     showModal = false
+     formData = {}
+     action
+
+    //Define a getter for category options
+    get categoryOptions(){
+        return categoryList
+    }
     
     async connectedCallback() {
       const expenses = await this.getExpenses()
@@ -93,9 +103,42 @@ export default class Home extends LightningElement {
     }
 
     // Modal Save Handler
-    saveHandler(){
-        this.showModal = false
-        console.log("Save Clicked")
+    saveHandler() {   
+        if (this.isFormValid()) {
+            this.showModal = false
+            console.log("Save Clicked success", this.formData)
+        } else {
+            console.log("Save Clicked Validation failed")
+        }
     }
+
+    // Add Expense Handler
+    addExpense() {
+        this.showModal  = true
+        this.formData = {}
+        this.action = ADD_ACTION
+    }
+
+    //form change handler
+    changeHandler(event) {
+        // const name = event.target.name  // Expense_Name__c
+        // const value = event.target.value // utility
+        const {name, value} = event.target
+        this.formData = {...this.formData, [name]:value}
+    }
+
+    //form Validation handler
+    isFormValid() {
+        let isValid = true
+        let inputFields = this.template.querySelectorAll('.validate')
+        inputFields.forEach( inputField => {
+            if (!inputField.checkValidity()) { 
+                inputField.reportValidity()
+                isValid = false
+            }
+        })
+        return isValid
+    }
+
 
 }
