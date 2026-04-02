@@ -1,5 +1,6 @@
 import { LightningElement } from 'lwc';
 import {categoryList} from './categoryList'
+import LightningConfirm from 'lightning/confirm';
 
 const SERVER_URL = 'http://localhost:3004'
 const ADD_ACTION = 'ADD'
@@ -68,6 +69,20 @@ export default class Home extends LightningElement {
     //delete row handler
     deleteHandler(event) {
         console.log(event.detail)
+        this.handleConfirmClick()
+    }
+
+    // Method to make a confirmation dialog for delete action
+    async handleConfirmClick() {
+        const result = await LightningConfirm.open({
+            message: 'Are you sure you want to delete',
+            variant: 'header',
+            label: 'Confirmation',
+            theme: 'error'
+        });
+        if (result) {
+            console.log("deleted record")
+        }
     }
 
     // Method to create chart data based on expenses
