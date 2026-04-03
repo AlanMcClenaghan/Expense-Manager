@@ -3,6 +3,7 @@ import {categoryList} from './categoryList'
 import LightningConfirm from 'lightning/confirm';
 
 const SERVER_URL = 'http://localhost:3004'
+const BACKEND_URL = 'http://localhost:3002'
 const ADD_ACTION = 'ADD'
 const EDIT_ACTION = 'EDIT'
 
@@ -14,6 +15,7 @@ export default class Home extends LightningElement {
      showModal = false
      formData = {}
      action
+     loggedInUser
 
     // Define a getter for category options
     get categoryOptions(){
@@ -26,19 +28,39 @@ export default class Home extends LightningElement {
     }
     
     async connectedCallback() {
-      const expenses = await this.getExpenses()
-      console.log("expenses", expenses)
-      this.expenseRecords = expenses.totalSize > 0 ? expenses.records :[]
-      this.createChartData()
+        console.log("CONNECTED CALLBACK START");
+        try {
+            const user = await this.getLoggedInUser()
+            console.log("user info", user)
+            if (!user || !user.user_id)  {
+                console.log("NO USER → redirecting");
+                window.location.href = `${BACKEND_URL}/oauth2/login`;
+            } else {
+                console.log("USER FOUND");
+                this.loggedInUser = user
+                const expenses = await this.getExpenses()
+                console.log("expenses", expenses)
+                this.expenseRecords = expenses.totalSize > 0 ? expenses.records :[]
+                this.createChartData()
+            }     
+        } catch(error) {
+            console.error("CONNECTED CALLBACK ERROR", error)
+        }
     }
 
-    //Method to get Expenses data
+    // Method to get logged-in user data
+    async getLoggedInUser() {
+        const url = `${BACKEND_URL}/oauth2/whoami`
+        return await this.makeApiRequest(url)
+    }
+
+    // Method to get Expenses data
     async getExpenses() {
         const url = `${SERVER_URL}/expenses`
         return await this.makeApiRequest(url)
     }
 
-    //Generic API Method
+    // Generic API Method
     async makeApiRequest(url, method = 'GET', data=null) {
         try{
             const requestOptions = {
@@ -58,7 +80,7 @@ export default class Home extends LightningElement {
         }
     }
 
-    //edit row handler
+    // Edit row handler
     editHandler(event) {
         this.action= EDIT_ACTION
         this.showModal = true
@@ -66,7 +88,7 @@ export default class Home extends LightningElement {
         console.log(event.detail)
     }
 
-    //delete row handler
+    // Delete row handler
     deleteHandler(event) {
         console.log(event.detail)
         this.handleConfirmClick()
@@ -149,7 +171,7 @@ export default class Home extends LightningElement {
         this.action = ADD_ACTION
     }
 
-    //form change handler
+    // Form change handler
     changeHandler(event) {
         // const name = event.target.name  // Expense_Name__c
         // const value = event.target.value // utility
@@ -157,7 +179,7 @@ export default class Home extends LightningElement {
         this.formData = {...this.formData, [name]:value}
     }
 
-    //form Validation handler
+    // Form Validation handler
     isFormValid() {
         let isValid = true
         let inputFields = this.template.querySelectorAll('.validate')
@@ -169,6 +191,5 @@ export default class Home extends LightningElement {
         })
         return isValid
     }
-
 
 }
