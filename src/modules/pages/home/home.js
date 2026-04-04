@@ -56,7 +56,7 @@ export default class Home extends LightningElement {
 
     // Method to get Expenses data
     async getExpenses() {
-        const url = `${SERVER_URL}/expenses`
+        const url = `${BACKEND_URL}/expenses`
         return await this.makeApiRequest(url)
     }
 
@@ -75,8 +75,9 @@ export default class Home extends LightningElement {
                 throw new Error(response.statusText)
             }
             return response.json()
-        }catch(error) {
-            console.log("Error Occurred", error)
+        } catch(error) {
+            console.error("Error Occurred", error)
+            throw error
         }
     }
 
