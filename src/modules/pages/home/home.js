@@ -2,21 +2,20 @@ import { LightningElement } from 'lwc';
 import {categoryList} from './categoryList'
 import LightningConfirm from 'lightning/confirm';
 
-const SERVER_URL = 'http://localhost:3004'
 const BACKEND_URL = 'http://localhost:3002'
 const ADD_ACTION = 'ADD'
 const EDIT_ACTION = 'EDIT'
 
 export default class Home extends LightningElement {
-
-     expenseRecords = []
-     categoryTableData=[]
-     chartData
-     showModal = false
-     formData = {}
-     action
-     loggedInUser
-     showSpinner = false
+    backendUrl = BACKEND_URL
+    expenseRecords = []
+    categoryTableData=[]
+    chartData
+    showModal = false
+    formData = {}
+    action
+    loggedInUser
+    showSpinner = false
 
     // Define a getter for category options
     get categoryOptions(){
@@ -29,24 +28,23 @@ export default class Home extends LightningElement {
     }
     
     async connectedCallback() {
-        console.log("CONNECTED CALLBACK START");
         try {
             const user = await this.getLoggedInUser()
-            console.log("user info", user)
             if (!user || !user.user_id)  {
-                console.log("NO USER → redirecting");
                 window.location.href = `${BACKEND_URL}/oauth2/login`;
             } else {
-                console.log("USER FOUND");
                 this.loggedInUser = user
-                const expenses = await this.getExpenses()
-                console.log("expenses", expenses)
-                this.expenseRecords = expenses.totalSize > 0 ? expenses.records :[]
-                this.createChartData()
+                await this.fetchExpenseData()
             }     
         } catch(error) {
             console.error("CONNECTED CALLBACK ERROR", error)
         }
+    }
+
+    async fetchExpenseData() {
+        const expenses = await this.getExpenses()
+        this.expenseRecords = expenses.totalSize > 0 ? expenses.records :[]
+        this.createChartData()
     }
 
     // Method to get logged-in user data
@@ -90,17 +88,16 @@ export default class Home extends LightningElement {
         this.action= EDIT_ACTION
         this.showModal = true
         this.formData = {...event.detail}
-        console.log(event.detail)
     }
 
     // Delete row handler
     deleteHandler(event) {
-        console.log(event.detail)
-        this.handleConfirmClick()
+        const url = `${BACKEND_URL}/expenses/${event.detail.Id}`
+        this.handleConfirmClick(url)
     }
 
     // Method to make a confirmation dialog for delete action
-    async handleConfirmClick() {
+    async handleConfirmClick(url) {
         const result = await LightningConfirm.open({
             message: 'Are you sure you want to delete',
             variant: 'header',
@@ -108,7 +105,10 @@ export default class Home extends LightningElement {
             theme: 'error'
         });
         if (result) {
-            console.log("deleted record")
+            const response = await this.makeApiRequest(url, 'DELETE')
+            if (response.id) {
+                await this.fetchExpenseData()
+            }
         }
     }
 
@@ -125,7 +125,6 @@ export default class Home extends LightningElement {
                 categorySums[Category__c] = Amount__c
             }
         })
-        console.log("categorySums", categorySums)
         this.categoryTableData = Object.keys(categorySums).map( (item,index) => {
             return ({
                 "id": index +1,
@@ -133,7 +132,6 @@ export default class Home extends LightningElement {
                 "amount": this.formatCurrency(categorySums[item])
             })
         })
-        console.log(" this.categoryTableData ",  this.categoryTableData )
         this.chartData = {
             labels:Object.keys(categorySums),
             results:Object.values(categorySums)
@@ -149,7 +147,6 @@ export default class Home extends LightningElement {
 
     // Modal Cancel Handler
     cancelHandler() {
-        console.log("Cancel Clicked")
         this.showModal = false
         this.action= null
     }
@@ -158,16 +155,14 @@ export default class Home extends LightningElement {
     saveHandler() {   
         if (this.isFormValid()) {
             if (this.formData.Id) {
-                console.log("Save Clicked success for Update", this.formData)
                 const url = `${BACKEND_URL}/expenses/${this.formData.Id}`
                 this.addAndUpdateHandler(url, 'PUT')
             } else {
-                console.log("Save Clicked success for Add", this.formData)
                 const url = `${BACKEND_URL}/expenses`
                 this.addAndUpdateHandler(url, 'POST')
             }
         } else {
-            console.log("Save Clicked Validation failed")
+            console.error("Save Clicked Validation failed")
         }
     }
 
@@ -175,9 +170,7 @@ export default class Home extends LightningElement {
     async addAndUpdateHandler(url, method) {
         const response =  await this.makeApiRequest(url, method, this.formData)
         if (response.id) {
-            const expenses = await this.getExpenses()
-            this.expenseRecords = expenses.totalSize > 0 ? expenses.records : []
-            this.createChartData()
+            await this.fetchExpenseData()
             this.showModal = false
             this.action= null
        }

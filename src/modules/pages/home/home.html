@@ -4,7 +4,7 @@
         <components-loader></components-loader>
     </template>
 
-    <components-navbar logged-in-user={loggedInUser}></components-navbar>
+    <components-navbar logged-in-user={loggedInUser} backend-url={backendUrl}></components-navbar>
     <div class="slds-p-around_large wrapper">
         <lightning-layout multiple-rows>
 
@@ -67,9 +67,9 @@
 
             <form>
                 <lightning-input type="text" label="Name" required name="Expense_Name__c" value={formData.Expense_Name__c} 
-                    class="validate" onkeyup={changeHandler}></lightning-input>
+                    class="validate" onchange={changeHandler}></lightning-input>
                 <lightning-input type="number" label="Amount" required name="Amount__c" value={formData.Amount__c} 
-                    class="validate" onkeyup={changeHandler}></lightning-input>
+                    class="validate" onchange={changeHandler}></lightning-input>
                 <lightning-input type="date" label="Expense Date" required class="validate" 
                     name="Date__c" value={formData.Date__c} onchange={changeHandler}></lightning-input>
                 <lightning-combobox
